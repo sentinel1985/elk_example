@@ -1,0 +1,46 @@
+version: '2'
+services:
+  elasticsearch:
+    image: elasticsearch:latest
+    command: elasticsearch -Des.network.host=0.0.0.0
+    expose:
+      - "9200"
+      - "9300"
+
+  logstash:
+    build: logstash/
+    command: logstash -f /etc/logstash/conf.d/logstash.conf
+    volumes:
+      - ./logstash/config:/etc/logstash/conf.d
+    ports:
+      #- "5000:5000"
+      - "5044:5044"
+    links:
+      - elasticsearch
+  kibana:
+    build: kibana/
+    volumes:
+      - ./kibana/config/:/opt/kibana/config/
+    expose:
+      - "5601"
+    links:
+      - elasticsearch
+
+  kibana-nginx:
+    build: kibana-nginx/
+    volumes:
+      - ./volumes/kibana-nginx/passwords/:/etc/nginx/passwords/
+    ports:
+      - "8080:8080"
+    links:
+      - kibana
+
+  webserver:
+    build: webserver/
+    volumes:
+      - ./volumes/webserver/html/:/usr/share/nginx/html/
+    ports:
+      - "80:80"
+    links:
+      - logstash
+      - elasticsearch
