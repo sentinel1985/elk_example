@@ -12,9 +12,9 @@ services:
     command: logstash -f /etc/logstash/conf.d/logstash.conf
     volumes:
       - ./logstash/config:/etc/logstash/conf.d
-    ports:
+    expose:
       #- "5000:5000"
-      - "5044:5044"
+      - "5044"
     links:
       - elasticsearch
   kibana:
